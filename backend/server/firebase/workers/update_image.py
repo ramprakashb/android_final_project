@@ -62,7 +62,7 @@ def get_image():
     worker_dir = os.path.dirname(os.path.realpath(__file__))
 
     # Path to configuration file`
-    image_dir = worker_dir + "/../../../../../face-recognition/cam-images/"
+    image_dir = worker_dir + "/../../../../face_recognition/cam-images/"
 
     # Validate if there is an image
     image = is_image(image_dir)
