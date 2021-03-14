@@ -20,10 +20,11 @@ import firebase_admin
 from firebase_admin import credentials
 import os
 
-
 # This is common for all workers
 # to avoid adding more code we will
 # reference this file and function
+
+
 def project_db_config():
 
     # Get the path to JSON file
@@ -40,10 +41,12 @@ def project_db_config():
 
     # Fetch the service account key JSON file contents
     cred = credentials.Certificate(config_json)
+    # Instantiates a client
 
     if cred:
         # Initialize the app with a service account, granting admin privileges
         firebase_admin.initialize_app(cred, {"databaseURL": database_url})
+
         return True
     else:
         return False
