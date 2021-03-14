@@ -30,7 +30,7 @@ import os
 class constants:
     """ Constants """
 
-    HOST = "Penguin"
+    HOST = subprocess.run(["hostname"], capture_output=True)
     KEEPALIVE = 60
     CLIENT = mqtt.Client()
     PORT = 1883
@@ -82,7 +82,7 @@ class Doorbell(object):
     @staticmethod
     def get_doorbell_status():
         """ Get the readings from the sensor """
-        doorbell_status = HAT.input.one
+        doorbell_status = HAT.input.one.read()
         if doorbell_status == 1:
             return True
 
@@ -101,8 +101,6 @@ class Doorbell(object):
         print("Connected")
         # ---------------------------------------
         return True
-
-    # ---------------------------------------
 
 
 def main():
@@ -134,6 +132,7 @@ def main():
 
         else:
             Doorbell.update_doorbell_status(False)
+            sleep(1.0)
 
 
 if __name__ == "__main__":
