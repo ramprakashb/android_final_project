@@ -14,6 +14,6 @@ pip install firebase
 pip install google-cloud-storage
 
 # Export the environment variable
-export GOOGLE_APPLICATION_CREDENTIALS="./private_key/final-project-backend-firebase-adminsdk-qdyq3-719ba73274.json"
+export GOOGLE_APPLICATION_CREDENTIALS="./server/firebase/private_key/final-project-backend-firebase-adminsdk-qdyq3-719ba73274.json"
 
 ## Explorer hat Pro
