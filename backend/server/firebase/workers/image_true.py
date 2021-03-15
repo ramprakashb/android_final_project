@@ -23,37 +23,27 @@ from firebase_credentials import project_db_config
 from firebase_admin import db
 
 
-def set_doorbell_false():
+def set_image_true():
     is_config = project_db_config()
     if is_config is not False:
-        doorbell_status_ref = db.reference("DOORBELL")
+        image_status_ref = db.reference("IMAGE")
         # Set the doorbell to true
-        doorbell_status_ref.set(False)
+        image_status_ref.set(True)
     else:
         return False
 
-    doorbell_status = check_doorbell_status()
-
-    if doorbell_status is True:
-        return True
-
-    return False
-
-
-def check_doorbell_status():
     # Is the new value true
-    doorbell_status_ref = db.reference("DOORBELL")
-    doorbell = doorbell_status_ref.get()
-    if doorbell is False:
-        return True
+    image = image_status_ref.get()
+    if image is True:
+        return image
 
     return False
 
 
 def main():
-    is_doorbell_false = set_doorbell_false()
-    if is_doorbell_false is True:
-        print("False")
+    is_image = set_image_true()
+    if is_image:
+        print("True")
         return True
 
     return False

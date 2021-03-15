@@ -25,12 +25,13 @@ import explorerhat as HAT
 import paho.mqtt.client as mqtt
 import subprocess
 import os
+import socket
 
 
 class constants:
     """ Constants """
 
-    HOST = subprocess.run(["hostname"], capture_output=True)
+    HOST = socket.gethostname()
     KEEPALIVE = 60
     CLIENT = mqtt.Client()
     PORT = 1883
@@ -63,6 +64,23 @@ class FaceRecognition(object):
         return False
 
     # ---------------------------------------
+
+    def trigger_camera():
+
+        # Get the path to of this file
+        # and navigate to workers
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        api_offset = "/../../../face_recognition/face-recognition-api/"
+        api_path = script_path + api_offset
+        script_name = "face_recognition.py"
+        script = api_path + script_name
+
+        image = subprocess.run(["python3", script], capture_output=True, timeout=2)
+        sleep(1.0)
+        if image is True:
+            return True
+
+        return False
 
     @staticmethod
     def update_image():
@@ -125,11 +143,22 @@ def main():
     constants.CLIENT.on_connect = FaceRecognition.on_connect(constants.CLIENT)
     while True:
         doorbell_status = FaceRecognition.get_doorbell_status()
+        # The doorbell is True
         if doorbell_status is True:
             try:
-                FaceRecognition.update_image()
-                print("========================")
-                sleep(1.0)
+                # Trigger the camera
+                camera_status = FaceRecognition.trigger_camera()
+                # If the camera returned True
+                # Update the Cloud Storage
+                # Update Date
+                # Update the IMAGE in the DB
+                if camera_status is True:
+                    is_updated = FaceRecognition.update_image()
+                    if is_updated is True:
+                        print("========================")
+                        # If people are pressing the button too many times
+                        # make sure that it sleeps
+                        sleep(10.0)
 
             except RuntimeError:
                 sleep(1.0)
