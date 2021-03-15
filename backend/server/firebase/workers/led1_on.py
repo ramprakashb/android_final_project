@@ -35,8 +35,8 @@ def turn_on_led1():
 
 def main():
     # if the led is on and the process runs in the background
-    subprocess.run(["kill", "-9", "$(ps | grep led1_on.py |  awk '$0')"])
-    HAT.output.one.stop()
+    # subprocess.run(["kill", "-9", "$(ps | grep led1_on.py |  awk '$0')"])
+    # HAT.output.one.stop()
     turn_on_led1()
 
 

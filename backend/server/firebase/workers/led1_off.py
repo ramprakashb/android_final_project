@@ -14,7 +14,7 @@ import subprocess
 
 # Toggle
 def turn_off_led1():
-    HAT.output.one.stop()
+    # HAT.output.one.stop()
     try:
         HAT.output.one.off()
     # Ctrl-C
@@ -31,8 +31,8 @@ def turn_off_led1():
 
 
 def main():
-    HAT.output.one.stop()
-    subprocess.run(["kill", "-9", "$(ps | grep 'led1_on.py' | awk '$0')"])
+    # HAT.output.one.stop()
+    # subprocess.run(["kill", "-9", "$(ps | grep 'led1_on.py' | awk '$0')"])
     turn_off_led1()
 
 
