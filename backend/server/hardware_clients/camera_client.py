@@ -115,13 +115,14 @@ def bellChanged(pin):
     if bellStatus == 1:
         try:
             script_path = os.path.dirname(os.path.realpath(__file__))
-            worker_offset = "/../firebace/workers/"
+            worker_offset = "/../firebase/workers/"
             path = script_path + worker_offset
-            worker_name = "doorbell_true.py"
+            print(path)
+            worker_name = path + "doorbell_true.py"
 
             # Update the Doorbell key to true
             # in the Firebase
-            subprocess.run([path, worker_name])
+            subprocess.run([worker_name])
 
             # Trigger the camera
             camera_status = FaceRecognition.trigger_camera()
