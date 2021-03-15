@@ -29,6 +29,7 @@ import socket
 import subprocess
 import paho.mqtt.client as mqtt
 from time import sleep
+import explorerhat as HAT
 
 # -----------
 
@@ -149,13 +150,22 @@ def main():
 
     door_status_ref = db.reference("DOOR_STATUS")
 
+    # constants.CLIENT.on_connect = Door.on_connect(constants.CLIENT)
+    # constants.CLIENT.on_subscribe = Door.on_subscribe
+    # constants.CLIENT.on_message = Door.on_message
+
+    print("Here")
     # ---------------------------------------
     while True:
-        constants.CLIENT.on_connect = Door.on_connect(constants.CLIENT)
-        constants.CLIENT.on_subscribe = Door.on_subscribe
-        constants.CLIENT.on_message = Door.on_message
         door_status = door_status_ref.get()
-        constants.CLIENT.publish("DOOR", door_status)
+        print(door_status)
+        if door_status == "Closed":
+            # Door.led1_on()
+            HAT.output.one.write(0)
+        else:
+            # Door.led1_off()
+            HAT.output.one.write(1)
+        # constants.CLIENT.publish("DOOR", door_status)
         sleep(1.0)
 
     # ---------------------------------------

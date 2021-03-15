@@ -26,7 +26,7 @@ import paho.mqtt.client as mqtt
 import subprocess
 import os
 import socket
-
+import door_client
 
 class constants:
     """ Constants """
@@ -167,10 +167,12 @@ def main():
 
     # Setup hat input
     HAT.input.one.changed(bellChanged)
-    while True:
-        print("Sleeping for 1 sec")
-        print("========================")
-        sleep(1.0)
+    # while True:
+    print("Passing Handle to door")
+    print("========================")
+    door_client.main()
+    print("Done Executing")
+    sleep(1.0)
 
 
 if __name__ == "__main__":
