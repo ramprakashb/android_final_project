@@ -25,12 +25,13 @@ import explorerhat as HAT
 import paho.mqtt.client as mqtt
 import subprocess
 import os
+import socket
 
 
 class constants:
     """ Constants """
 
-    HOST = subprocess.run(["hostname"], capture_output=True)
+    HOST = socket.gethostname()
     KEEPALIVE = 60
     CLIENT = mqtt.Client()
     PORT = 1883
