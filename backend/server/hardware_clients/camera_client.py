@@ -74,15 +74,17 @@ class FaceRecognition(object):
         api_path = script_path + api_offset
         script_name = "face_recognition.py"
         script = api_path + script_name
+        print(script)
 
         api = subprocess.run(
             [script],
-            capture_output=True,
+            # capture_output=True,
             timeout=999,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
         exit_code = api.returncode
+        print(exit_code)
         if exit_code == 0:
             print("Image is ready to update")
             return True
@@ -92,39 +94,22 @@ class FaceRecognition(object):
 
     @staticmethod
     def update_image():
-
-        # Get the path to of this file
-        # and navigate to workers
         script_path = os.path.dirname(os.path.realpath(__file__))
-        worker_path = script_path + "/../firebase/workers/"
+        worker_path= script_path + "/../firebase/workers/"
+        print(worker_path)
+        # Run the update_image worker
+        update_image = worker_path + "update_image.py"
+        print("Updateing image")
+        subprocess.run([update_image], capture_output=True)
+        # If the image has updated successfully
+        # return true
+        # if image is True:
+        #     print("Nice!")
+        #     print("========================")
+        #     return True
 
-        # Check the status
-        # If the local hardware is 1 and the firebase is 1
-        # the trigger the face -recognition Api
-        doorbell = HAT.output.one.read()
-        if doorbell:
-            doorbell_status = True
-
-        # If the doorbell is true
-        if doorbell_status is True:
-
-            # Run the update_image worker
-            update_image = worker_path + "update_image.py"
-            image = subprocess.run([update_image], capture_output=True)
-            # If the image has updated successfully
-            # return true
-            if image is True:
-                print("Nice!")
-                print("========================")
-                return True
-
-            print("Something is wrong!")
-            print("========================")
-            return False
-
-        print("Something is wrong!")
         print("========================")
-        return False
+        return True
 
     # ---------------------------------------
     @staticmethod
@@ -140,6 +125,43 @@ class FaceRecognition(object):
         # ---------------------------------------
         return True
 
+## Function on bell pressed
+def bellChanged(pin):
+    bellStatus= HAT.input.one.read()
+    if bellStatus ==1:
+        try:
+            # Trigger the camera
+            camera_status = FaceRecognition.trigger_camera()
+            print(camera_status)
+            # If the camera returned True
+            # Update the Cloud Storage
+            # Update Date
+            # Update the IMAGE in the DB
+            if camera_status is True:
+                is_updated = FaceRecognition.update_image()
+                print(is_updated)
+                if is_updated is True:
+                    print("========================")
+                    # If people are pressing the button too many times
+                    # make sure that it sleeps
+                    sleep(10.0)
+
+        except RuntimeError:
+            sleep(1.0)
+
+        # Ctrl + C
+        except KeyboardInterrupt:
+            pass
+
+        # Catches any other exceptions.
+        except Exception:
+            pass
+    else:
+        print("Sleeping for 1 sec")
+        print("========================")
+        sleep(1.0)
+
+
 
 def main():
 
@@ -149,40 +171,44 @@ def main():
 
     print("========================")
     constants.CLIENT.on_connect = FaceRecognition.on_connect(constants.CLIENT)
+
+    ##Setup hat input
+    HAT.input.one.changed(bellChanged)
     while True:
-        doorbell_status = FaceRecognition.get_doorbell_status()
-        # The doorbell is True
-        if doorbell_status is True:
-            try:
-                # Trigger the camera
-                camera_status = FaceRecognition.trigger_camera()
-                # If the camera returned True
-                # Update the Cloud Storage
-                # Update Date
-                # Update the IMAGE in the DB
-                if camera_status is True:
-                    is_updated = FaceRecognition.update_image()
-                    if is_updated is True:
-                        print("========================")
-                        # If people are pressing the button too many times
-                        # make sure that it sleeps
-                        sleep(10.0)
+        # # doorbell_status = FaceRecognition.get_doorbell_status()
+        # # The doorbell is True
+        # # print(doorbell_status)
+        # # if doorbell_status is True:
+        #     try:
+        #         # Trigger the camera
+        #         camera_status = FaceRecognition.trigger_camera()
+        #         # If the camera returned True
+        #         # Update the Cloud Storage
+        #         # Update Date
+        #         # Update the IMAGE in the DB
+        #         if camera_status is True:
+        #             is_updated = FaceRecognition.update_image()
+        #             if is_updated is True:
+        #                 print("========================")
+        #                 # If people are pressing the button too many times
+        #                 # make sure that it sleeps
+        #                 sleep(10.0)
 
-            except RuntimeError:
-                sleep(1.0)
-                continue
+        #     except RuntimeError:
+        #         sleep(1.0)
+        #         continue
 
-            # Ctrl + C
-            except KeyboardInterrupt:
-                pass
+        #     # Ctrl + C
+        #     except KeyboardInterrupt:
+        #         pass
 
-            # Catches any other exceptions.
-            except Exception:
-                pass
-        else:
-            print("Sleeping for 1 sec")
-            print("========================")
-            sleep(1.0)
+        #     # Catches any other exceptions.
+        #     except Exception:
+        #         pass
+        # else:
+        print("Sleeping for 1 sec")
+        print("========================")
+        sleep(1.0)
 
 
 if __name__ == "__main__":

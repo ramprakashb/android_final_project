@@ -52,18 +52,20 @@ def set_image_true():
 
 
 def set_date():
-    config = project_db_config()
-    if config is not False:
-        date_ref = db.reference("DATE_TIME")
-        date_time = datetime.datetime.now()
-        # Set the doorbell to true
-        date_ref.set(date_time)
-        print(date_time)
-        print("================================")
-        return True
-    else:
-        print("Error: Did not update DATE_TIME")
-        return False
+    #config = project_db_config()
+    #if config is not False:
+    date_ref = db.reference("DATE_TIME")
+    #date_time = datetime.datetime.now()
+    # Set the doorbell to true
+    date_time= datetime.datetime.now().isoformat(timespec='minutes')
+    date_ref.set(date_time)
+
+    print(date_time)
+    print("================================")
+    return True
+ #   else:
+ #       print("Error: Did not update DATE_TIME")
+ #       return False
 
 
 # Update image on the cloud based server
@@ -121,17 +123,20 @@ def main():
         print("Image: OK!")
         print("================================")
         update_firebase_storage(newest_image)
+        print("Something")
 
     # Set IMAGE to True in Firebase
     is_image_set = set_image_true()
+    print(is_image_set)
     if is_image_set is True:
         is_date = set_date()
+        print(is_date)
         if is_date is True:
             print("DONE !")
             print("================================")
             return True
 
-    return False
+    #return False
 
 
 if __name__ == "__main__":
