@@ -57,7 +57,10 @@ def set_date():
     date_ref = db.reference("DATE_TIME")
     #date_time = datetime.datetime.now()
     # Set the doorbell to true
-    date_time= datetime.datetime.now().isoformat(timespec='minutes')
+    # date_time= datetime.datetime.now().isoformat(timespec='minutes')
+    now= datetime.datetime.now()
+
+    date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
     date_ref.set(date_time)
 
     print(date_time)
