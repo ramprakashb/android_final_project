@@ -25,12 +25,13 @@ import explorerhat as HAT
 import paho.mqtt.client as mqtt
 import subprocess
 import os
+import socket
 
 
 class constants:
     """ Constants """
 
-    HOST = subprocess.run(["hostname"], capture_output=True)
+    HOST = socket.gethostname()
     KEEPALIVE = 60
     CLIENT = mqtt.Client()
     PORT = 1883
@@ -74,8 +75,7 @@ class FaceRecognition(object):
         script_name = "face_recognition.py"
         script = api_path + script_name
 
-        image = subprocess.run(["python3", script],
-                               capture_output=True, timeout=2)
+        image = subprocess.run(["python3", script], capture_output=True, timeout=2)
         sleep(1.0)
         if image is True:
             return True
