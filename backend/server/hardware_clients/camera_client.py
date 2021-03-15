@@ -64,7 +64,7 @@ class FaceRecognition(object):
         return False
 
     # ---------------------------------------
-
+    @staticmethod
     def trigger_camera():
 
         # Get the path to of this file
@@ -75,12 +75,20 @@ class FaceRecognition(object):
         script_name = "face_recognition.py"
         script = api_path + script_name
 
-        image = subprocess.run(["python3", script], capture_output=True, timeout=2)
-        sleep(1.0)
-        if image is True:
+        api = subprocess.run(
+            [script],
+            capture_output=True,
+            timeout=999,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        exit_code = api.returncode
+        if exit_code == 0:
+            print("Image is ready to update")
             return True
-
-        return False
+        else:
+            print("Error: Exit code " + exit_code)
+            return exit_code
 
     @staticmethod
     def update_image():
