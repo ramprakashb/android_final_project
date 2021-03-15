@@ -20,12 +20,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from time import sleep
-import explorerhat as HAT
-import paho.mqtt.client as mqtt
-import subprocess
+import re
 import os
+import firebase_admin
+from firebase_admin import db
+from firebase_admin import credentials
 import socket
+import subprocess
+import paho.mqtt.client as mqtt
+from time import sleep
+
+# -----------
 
 
 class constants:
@@ -35,61 +40,71 @@ class constants:
     KEEPALIVE = 60
     CLIENT = mqtt.Client()
     PORT = 1883
+    PATH = os.path.dirname(os.path.realpath(__file__))
+    WORKER_PATH = PATH + "/../firebase/workers/"
 
 
 # ---------------------------------------
 
 
-class Doorbell(object):
+class Door(object):
     """ Object to update the doorbell """
 
+    # ---------------------------------------
     @staticmethod
     def on_connect(CLIENT):
         """
         Subscribing in on_connect() means that if we lose the connection and
         reconnect then subscriptions will be renewed.
         """
-        CLIENT.subscribe("$SYS/#")
+        CLIENT.subscribe("DOOR")
         return
 
     # ---------------------------------------
     @staticmethod
-    def update_doorbell_status(doorbell_status):
-        """
-        Get the doorbell status (1 or 0) from the explorer hat
-        and update the database
-        """
-        # Get the path to of this file
-        # and navigate to workers
-        script_path = os.path.dirname(os.path.realpath(__file__))
-        worker_path = script_path + "/../firebase/workers/"
-
-        # If the doorbell is active
-        # update the real time database with True
-        # using one of the workers
-        if doorbell_status is True:
-            # Path to worker script
-            doorbell_true = worker_path + "doorbell_true.py"
-            print("True")
-            return subprocess.run([doorbell_true], capture_output=True)
-
-        else:
-            print("False")
-            doorbell_false = worker_path + "doorbell_false.py"
-            return subprocess.run([doorbell_false], capture_output=True)
+    def on_subscribe(CLIENT, userdata, mid, granted_qos):
+        print("Subscribed")
+        return
 
     # ---------------------------------------
 
     @staticmethod
-    def get_doorbell_status():
-        """ Get the readings from the sensor """
-        doorbell_status = HAT.input.one.read()
-        if doorbell_status == 1:
-            return True
-
-        return False
+    def led1_on():
+        print("LED ON ... ")
+        return subprocess.run([constants.WORKER_PATH + "led1_on.py"])
 
     # ---------------------------------------
+    @staticmethod
+    def led1_off():
+        print("LED OFF ... ")
+        return subprocess.run([constants.WORKER_PATH + "led1_off.py"])
+
+    # ---------------------------------------
+    @staticmethod
+    def on_message(CLIENT, userdata, msg):
+        payload = str(msg.payload)
+
+        if payload:
+            print("Payload received")
+
+        # ---------------------------------------
+        is_on = re.compile("Open")
+        is_off = re.compile("Closed")
+
+        if str(msg.topic) == "DOOR":
+            if is_on.search(payload):
+                print("Door Opened ...")
+                print("Turning on Led 1 ...")
+                Door.led1_on()
+            elif is_off.search(payload):
+                print("Door Closed ...")
+                print("Turning off Led 1 ...")
+                Door.led1_off()
+
+        return
+
+    # ---------------------------------------
+
     @staticmethod
     def start_deamon():
         """ establish connection with mqtt"""
@@ -107,33 +122,43 @@ class Doorbell(object):
 def main():
 
     constants.CLIENT.loop_start()
-    if Doorbell.start_deamon() is not True:
+    if Door.start_deamon() is not True:
         return "Error: Deamon did not start"
 
-    constants.CLIENT.on_connect = Doorbell.on_connect(constants.CLIENT)
+    # ---------------------------------------
+
+    # Get the path to JSON file
+    script_path = os.path.dirname(os.path.realpath(__file__))
+
+    # Json file name
+    file_name = "final-project-backend-firebase-adminsdk-qdyq3-719ba73274.json"
+
+    # Path to configuration file
+    config_json = script_path + "/../firebase/private_key/" + file_name
+
+    # Url to database
+    database_url = "https://final-project-backend-default-rtdb.firebaseio.com/"
+
+    # Fetch the service account key JSON file contents
+    cred = credentials.Certificate(config_json)
+    # Instantiates a client
+
+    if cred:
+        # Initialize the app with a service account, granting admin privileges
+        firebase_admin.initialize_app(cred, {"databaseURL": database_url})
+
+    door_status_ref = db.reference("DOOR_STATUS")
+
+    # ---------------------------------------
     while True:
-        doorbell_status = Doorbell.get_doorbell_status()
-        if doorbell_status is True:
-            try:
-                doorbell = Doorbell.update_doorbell_status(True)
-                print(doorbell)
-                sleep(1.0)
+        constants.CLIENT.on_connect = Door.on_connect(constants.CLIENT)
+        constants.CLIENT.on_subscribe = Door.on_subscribe
+        constants.CLIENT.on_message = Door.on_message
+        door_status = door_status_ref.get()
+        constants.CLIENT.publish("DOOR", door_status)
+        sleep(1.0)
 
-            except RuntimeError as error:
-                sleep(1.0)
-                continue
-
-            # Ctrl + C
-            except KeyboardInterrupt:
-                pass
-
-            # Catches any other exceptions.
-            except Exception:
-                pass
-
-        else:
-            Doorbell.update_doorbell_status(False)
-            sleep(1.0)
+    # ---------------------------------------
 
 
 if __name__ == "__main__":
