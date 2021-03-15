@@ -53,17 +53,6 @@ class FaceRecognition(object):
         return
 
     # ---------------------------------------
-
-    @staticmethod
-    def get_doorbell_status():
-        """ Get the readings from the sensor """
-        doorbell_status = HAT.input.one.read()
-        if doorbell_status == 1:
-            return True
-
-        return False
-
-    # ---------------------------------------
     @staticmethod
     def trigger_camera():
 
@@ -95,19 +84,12 @@ class FaceRecognition(object):
     @staticmethod
     def update_image():
         script_path = os.path.dirname(os.path.realpath(__file__))
-        worker_path= script_path + "/../firebase/workers/"
+        worker_path = script_path + "/../firebase/workers/"
         print(worker_path)
         # Run the update_image worker
         update_image = worker_path + "update_image.py"
         print("Updateing image")
         subprocess.run([update_image], capture_output=True)
-        # If the image has updated successfully
-        # return true
-        # if image is True:
-        #     print("Nice!")
-        #     print("========================")
-        #     return True
-
         print("========================")
         return True
 
@@ -125,11 +107,21 @@ class FaceRecognition(object):
         # ---------------------------------------
         return True
 
-## Function on bell pressed
+
+# Function on bell pressed
 def bellChanged(pin):
-    bellStatus= HAT.input.one.read()
-    if bellStatus ==1:
+    bellStatus = HAT.input.one.read()
+    if bellStatus == 1:
         try:
+            script_path = os.path.dirname(os.path.realpath(__file__))
+            worker_offset = "/../firebace/workers/"
+            path = script_path + worker_offset
+            worker_name = "doorbell_true.py"
+
+            # Update the Doorbell key to true
+            # in the Firebase
+            subprocess.run([path, worker_name])
+
             # Trigger the camera
             camera_status = FaceRecognition.trigger_camera()
             print(camera_status)
@@ -147,7 +139,7 @@ def bellChanged(pin):
                     sleep(10.0)
 
         except RuntimeError:
-            sleep(1.0)
+            sleep(2.0)
 
         # Ctrl + C
         except KeyboardInterrupt:
@@ -162,7 +154,6 @@ def bellChanged(pin):
         sleep(1.0)
 
 
-
 def main():
 
     constants.CLIENT.loop_start()
@@ -172,40 +163,9 @@ def main():
     print("========================")
     constants.CLIENT.on_connect = FaceRecognition.on_connect(constants.CLIENT)
 
-    ##Setup hat input
+    # Setup hat input
     HAT.input.one.changed(bellChanged)
     while True:
-        # # doorbell_status = FaceRecognition.get_doorbell_status()
-        # # The doorbell is True
-        # # print(doorbell_status)
-        # # if doorbell_status is True:
-        #     try:
-        #         # Trigger the camera
-        #         camera_status = FaceRecognition.trigger_camera()
-        #         # If the camera returned True
-        #         # Update the Cloud Storage
-        #         # Update Date
-        #         # Update the IMAGE in the DB
-        #         if camera_status is True:
-        #             is_updated = FaceRecognition.update_image()
-        #             if is_updated is True:
-        #                 print("========================")
-        #                 # If people are pressing the button too many times
-        #                 # make sure that it sleeps
-        #                 sleep(10.0)
-
-        #     except RuntimeError:
-        #         sleep(1.0)
-        #         continue
-
-        #     # Ctrl + C
-        #     except KeyboardInterrupt:
-        #         pass
-
-        #     # Catches any other exceptions.
-        #     except Exception:
-        #         pass
-        # else:
         print("Sleeping for 1 sec")
         print("========================")
         sleep(1.0)
