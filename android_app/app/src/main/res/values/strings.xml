@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Burgler Alert</string>
+    <string name="openDoor">Open Door</string>>
+    <string name="GetPhoto">Get Photo</string>>
+    <string name="NotificationTitle">Notification</string>>
+    <string name="DateNotify">Date</string>>
+    <string name="NotifyPayload">Intruder Detected</string>
+    <string name="OpenDoor">Open Door</string>>
+    <string name="CloseDoor">Close Door</string>>
+    <string name="bell_On">Bell On</string>>
+    <string name="bell_off">Bell Off</string>
+</resources>
