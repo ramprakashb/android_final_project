@@ -5,8 +5,6 @@ Api for triggering the camera,
 recognizing if it is a human,
 and storing the image.
 """
-# commenting numpy since it is not used
-# import numpy as np
 import cv2
 import sys
 import os
@@ -27,6 +25,10 @@ class const:
 
 
 # --------------------------------
+"""
+Function to inititizlize camera attached to
+Raspberry Pi. Return Error if camera not found
+"""
 def camInit():
     try:
         vid = cv2.VideoCapture(0)
@@ -54,24 +56,31 @@ def camInit():
 
 # --------------------------------
 def main():
+    # Initialize Camera
     vid, stat = camInit()
     if stat != 0:
         return stat
+
+    # Import Machine learning Model
     try:
         ffCascade = cv2.CascadeClassifier(const.FRONT_FACE_XML)
         pass
     except Exception:
         print("Cascade File Not Found")
         return 3
+    # Start Capturing 60 frames and detect human faces
     hCounter = 0
     for i in range(0, 60):
         ret, img = vid.read()
         try:
+            # Preprocess the image by converting it to gray scale
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         except Exception:
             print("Camera not found")
             return 1
         try:
+            # Pass the processed image to Machine learning model to detect faces
+            # Faces are returned in 2-d array with coordinates of faces detected.
             faces = ffCascade.detectMultiScale(gray, 1.3, 5)
         except Exception:
             print("Cascade not found")
