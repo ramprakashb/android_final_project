@@ -110,14 +110,12 @@ class FaceRecognition(object):
 
 # Function on bell pressed
 def bellChanged(pin):
-    print("Here")
     bellStatus = HAT.input.one.read()
     if bellStatus == 1:
         try:
             script_path = os.path.dirname(os.path.realpath(__file__))
             worker_offset = "/../firebase/workers/"
             path = script_path + worker_offset
-            print(path)
             worker_name = path + "doorbell_true.py"
 
             # Update the Doorbell key to true
