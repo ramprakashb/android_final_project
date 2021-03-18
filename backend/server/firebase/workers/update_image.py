@@ -52,12 +52,7 @@ def set_image_true():
 
 
 def set_date():
-    #config = project_db_config()
-    #if config is not False:
     date_ref = db.reference("DATE_TIME")
-    #date_time = datetime.datetime.now()
-    # Set the doorbell to true
-    # date_time= datetime.datetime.now().isoformat(timespec='minutes')
     now= datetime.datetime.now()
 
     date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
@@ -66,9 +61,6 @@ def set_date():
     print(date_time)
     print("================================")
     return True
- #   else:
- #       print("Error: Did not update DATE_TIME")
- #       return False
 
 
 # Update image on the cloud based server
